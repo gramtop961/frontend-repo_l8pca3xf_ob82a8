@@ -1,12 +1,41 @@
+import { useEffect, useState } from 'react'
 import { motion } from 'framer-motion'
-import Spline from '@splinetool/react-spline'
 import { Feather, BookOpen } from 'lucide-react'
 
 export default function SplashHero() {
+  const [SplineComp, setSplineComp] = useState(null)
+  const [splineReady, setSplineReady] = useState(false)
+
+  useEffect(() => {
+    let mounted = true
+    import('@splinetool/react-spline')
+      .then((m) => {
+        if (mounted) setSplineComp(() => m.default)
+      })
+      .catch(() => {
+        if (mounted) setSplineComp(null)
+      })
+    return () => {
+      mounted = false
+    }
+  }, [])
+
   return (
     <section className="relative h-[70vh] w-full overflow-hidden bg-[#0B1A2D] text-white">
       <div className="absolute inset-0">
-        <Spline scene="https://prod.spline.design/AfW8n7fP2QdH9q3X/scene.splinecode" style={{ width: '100%', height: '100%' }} />
+        {SplineComp ? (
+          <SplineComp
+            scene="https://prod.spline.design/AfW8n7fP2QdH9q3X/scene.splinecode"
+            style={{ width: '100%', height: '100%' }}
+            onLoad={() => setSplineReady(true)}
+          />
+        ) : (
+          <img
+            src="https://images.unsplash.com/photo-1500534314209-a25ddb2bd429?q=80&w=2000&auto=format&fit=crop"
+            alt="Recanati sunset"
+            className="w-full h-full object-cover opacity-60"
+          />
+        )}
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/40 to-[#0B1A2D] pointer-events-none" />
 
@@ -40,14 +69,18 @@ export default function SplashHero() {
           transition={{ delay: 0.6, duration: 0.7 }}
           className="mt-8 flex flex-wrap items-center justify-center gap-4"
         >
-          <button className="px-6 py-3 rounded-full bg-[#D4A017] text-[#0B1A2D] font-semibold shadow hover:brightness-95 transition">
+          <a href="#explore" className="px-6 py-3 rounded-full bg-[#D4A017] text-[#0B1A2D] font-semibold shadow hover:brightness-95 transition">
             Start Exploring
-          </button>
-          <button className="px-6 py-3 rounded-full border border-white/30 text-white hover:bg-white/10 transition flex items-center gap-2">
+          </a>
+          <a href="#routes" className="px-6 py-3 rounded-full border border-white/30 text-white hover:bg-white/10 transition flex items-center gap-2">
             <Feather className="w-5 h-5" />
             Poetic Routes
-          </button>
+          </a>
         </motion.div>
+
+        {!splineReady && SplineComp && (
+          <p className="mt-3 text-xs text-white/70">Loading 3D scene…</p>
+        )}
       </div>
     </section>
   )
